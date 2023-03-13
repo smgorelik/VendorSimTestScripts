@@ -39,7 +39,8 @@ function Invoke-FodHelper {
 			Remove-Item "HKCU:\Software\Classes\.bla\" -Recurse -Force
 		}else
 		{
-			[System.Windows.MessageBox]::Show('You have to be Administrator')		
+			Add-Type -AssemblyName PresentationFramework;
+			[System.Windows.MessageBox]::Show('You have to be Administrator');	
 		}
     }
 
