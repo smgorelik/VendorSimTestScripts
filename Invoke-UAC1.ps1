@@ -21,7 +21,9 @@ function Invoke-FodHelper {
         [String]$program= "cmd.exe /c whoami /groups | find ""S-1-16-12288"" && Echo I am running elevated, so I must be an admin anyway ;-) || Echo I am not running elevanted :-(" #default
     )
     Begin {
-        $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+		$me = whoami.exe
+		$adminNames = Get-LocalGroupMember -Group 'Administrators' | Select-Object -ExpandProperty name
+        $isAdmin = $adminNames -Contains $me
     }
 
     Process {
