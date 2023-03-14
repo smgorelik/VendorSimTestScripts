@@ -18,7 +18,7 @@ function Invoke-FodHelper {
     Param
     (
         [Parameter(Mandatory = $false)]
-        [String]$program= 'cmd.exe /c whoami /groups | find "S-1-16-12288" && Echo I am running elevated, so I must be an admin anyway ;-) || Echo I am not running elevanted :-('
+        [String]$program= 'cmd.exe'
     )
     Begin {
 		$me = whoami.exe
