@@ -529,7 +529,7 @@ function Invoke-Hollow64 {
     }
 
     Process {
-		[Hollow64]::Run()
+		[Loader]::Run()
     }
 
 }
