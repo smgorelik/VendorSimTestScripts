@@ -526,7 +526,7 @@ function Invoke-Hollow64 {
         [String]$program= ''
     )
     Begin {
-		Add-Type $Hollow64
+		Add-Type $Hollow64 -CompilerParameters 'UNSAFE'
     }
 
     Process {
