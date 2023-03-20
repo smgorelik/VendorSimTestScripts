@@ -94,7 +94,8 @@ https://attack.mitre.org/techniques/T1620/
 Adversaries abuse Rundll32 to execute JavaScript and VBScript codes without downloading scripts.
 Due to architectural weakness within the rundll32 loading process, rundll32 can be misused to not only load DLLs, but also to execute a direct Javascript or VBScript code.
 
-*note that this command line is executed from a command-prompt*
+**note that this command line is executed from a command-prompt**
+
 https://attack.mitre.org/techniques/T1218/011/
 
 `CMD> rundll32.exe vbscript:"\..\\mshtml, RunHTMLApplication "+Close(CreateObject("WScript.Shell").Run("calc"))`
