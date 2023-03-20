@@ -40,6 +40,7 @@ https://attack.mitre.org/techniques/T1548/002/
 ## Antimalware Scan Interface (AMSI) 
 Adversaries may modify and/or disable security tools to avoid possible detection of their malware/tools and activities.
 Patching Antimalware Scan Interface (AMSI) becomes part of almost every attack with intention to tamper visibility into script execution
+
 https://attack.mitre.org/techniques/T1562/001/
 
 ### 1. AmsiScanBuffer
