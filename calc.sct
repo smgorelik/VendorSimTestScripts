@@ -2,7 +2,7 @@
 <scriptlet>
 <registration         
 progid="Pentest"       
-classid="{0000f35c-0000-0000-0000-53f1dabbf371}" >
+classid="{000cf35c-0000-0000-0000-53f1dabbf371}" >
 <script language="VBScript">
  
 <![CDATA[   
